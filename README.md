@@ -1,2 +1,2 @@
 # Register-System-
-php register system with confirmation mail server
+php login and registeration system with confirmation mail server
