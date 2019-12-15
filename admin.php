@@ -11,6 +11,7 @@
 </head>
 <body>
 
+
 	 <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -36,12 +37,14 @@
 
 
 	<div class="jumbotron">
-		<h1 class="text-center"> Home Page</h1>
+		<h1 class="text-center">Admin</h1>
 	</div>
 
 
-	
-</div> <!--Container-->
+
+
+
+</div>
 
 
 

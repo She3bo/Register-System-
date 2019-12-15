@@ -35,8 +35,10 @@
 <div class="container">
 
 
+
+
 	<div class="jumbotron">
-		<h1 class="text-center"> Home Page</h1>
+		<h1 class="text-center"></h1>
 	</div>
 
 
