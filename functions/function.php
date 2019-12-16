@@ -11,6 +11,7 @@ function redirect($loc){
     return header("Location:$loc");
 }
 function set_message($message){
+    
     if(!empty($message)){
         $_SESSION['message'] = $message;
     }else{
@@ -19,8 +20,7 @@ function set_message($message){
 }
 function dispaly_message(){
     if(isset($_SESSION['message'])){
-        $errors[]= $_SESSION['message'];
-
+        echo $_SESSION['message'];
         unset($_SESSION['message']);
     }
 }
@@ -59,7 +59,9 @@ function email_exit($email){
         return false;
     }
 }
-
+function send_mail($to,$subject,$message,$header){
+   return mail($to,$subject,$message,$header);
+}
 /* ********************  Validation Function ********************************** */
 function validate_user_registration(){
 
@@ -110,10 +112,79 @@ function validate_user_registration(){
             $errors [] = "Your Password faild do not match";
         }
          
+        if(!empty($errors)){
+            foreach($errors as $error){
+                echo validation_error($error);
+            }
+        }
+        else{
+            if(register_user($firstname,$lastname,$username,$email,$password)){
+                set_message("<p>Regisrter Succssfully! check your email for activation </p>");
+                redirect("index.php");
+            }else{
+                set_message("<p class='bg-danger'>Sorry!Registration not completed. please register again </p>");
+            }
+        }
     }
-    if(!empty($errors)){
-        foreach($errors as $error){
-            echo validation_error($error);
+}
+
+function register_user($firstname,$lastname,$username,$email,$password){
+    // 
+    $firstname    = escape($firstname);
+    $lastname     = escape($lastname);
+    $username     = escape($username);
+    $email        = escape($email);
+    $password     = escape($password);
+
+    // encrypt the password using md5
+    $password = md5($password);
+
+    // generate and encrypt the confirm_code using md5 based on username 
+    $confirm_code = md5((int)$username + microtime());
+    
+    // query to insert user to database 
+    $sql = "insert into users(first_name,last_name,username,email,password,confirm_code,active)
+            values('$firstname','$lastname','$username','$email','$password','$confirm_code','0')";
+    
+    $result = query($sql);
+    confirm($result);
+
+    // email parametters to send activation code to user  
+    $subject = "Active Account";
+
+    $message = "please click the link below to active your account 
+                http://localhost/Register-System-/active.php/?email=$email&code=$confirm_code";
+   
+    $header  = "From: norply@yourwebsit.com";
+
+
+    send_mail($email,$subject,$mesg,$header);
+
+    return true;
+}
+
+function activate_user(){
+
+    if($_SERVER['REQUST_METHOD']='GET'){
+        if(isset($_GET['email'])){
+
+            $email = clean($_GET['email']);
+            $code = clean($_GET['code']);
+
+            $sql = "select id from users where email = '$email' and confirm_code = '$code' ";
+            $result = query($sql);
+            confirm($result);
+            
+            if(row_count($result) == 1){
+                $sql2 = "update users set active = 1 , confirm_code = 0 where email = '".escape($email)."' and confirm_code = '".escape($code)."' "; 
+                $result2 = query($sql2);
+                confirm($result2);
+                set_message("<p class='bg-success'>Your account has been activated please login </p>");
+                redirect("login.php");
+            }else{
+                set_message("<p class='bg-danger'>Sorry! there's a problem Your account could not be activated </p>");
+                redirect("login.php");
+            }
         }
     }
 }
