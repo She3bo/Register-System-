@@ -5,7 +5,10 @@
 	<div class="row">
 		<div class="col-lg-6 col-lg-offset-3">
             
-		<?php  dispaly_message(); ?>
+		<?php  
+			validate_user_login();
+			dispaly_message(); 
+		?>
 								
 		</div>
 	</div>
@@ -63,4 +66,5 @@
 			</div>
 
 		</div>
+		
 <?php include("includes/footer.php")?>

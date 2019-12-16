@@ -11,7 +11,6 @@ function redirect($loc){
     return header("Location:$loc");
 }
 function set_message($message){
-    
     if(!empty($message)){
         $_SESSION['message'] = $message;
     }else{
@@ -101,10 +100,7 @@ function validate_user_registration(){
         }
         if(email_exit($email)){
             $errors[]= "Sorry this email is already is register";
-        }
-        if(strlen($password) < $min){
-            $errors[]= "Your Password name cannot be less than {$min} character";
-        }
+        }        
         if(strlen($password) > $max){
             $errors[]= "Your Password name cannot be more than {$max} character";
         }
@@ -127,6 +123,7 @@ function validate_user_registration(){
         }
     }
 }
+/* ********************  register user Function ********************************** */
 
 function register_user($firstname,$lastname,$username,$email,$password){
     // 
@@ -163,6 +160,8 @@ function register_user($firstname,$lastname,$username,$email,$password){
     return true;
 }
 
+/* ********************  active user Function ********************************** */
+
 function activate_user(){
 
     if($_SERVER['REQUST_METHOD']='GET'){
@@ -171,7 +170,7 @@ function activate_user(){
             $email = clean($_GET['email']);
             $code = clean($_GET['code']);
 
-            $sql = "select id from users where email = '$email' and confirm_code = '$code' ";
+            $sql = "select id from users where email = '".escape($email)."' and confirm_code = '".escape($code)."' ";
             $result = query($sql);
             confirm($result);
             
@@ -186,5 +185,62 @@ function activate_user(){
                 redirect("login.php");
             }
         }
+    }
+}
+
+/* ********************  Validation login Function ********************************** */
+
+function validate_user_login(){
+
+    $min = 3;
+    $max = 20;
+    $errors = [];
+
+
+    if($_SERVER['REQUEST_METHOD'] == 'POST'){
+
+        $email       = clean($_POST['email']);
+        $password    = clean($_POST['password']);
+
+        if(empty($email)){
+            $errors[]= "Email cannot be empty";
+        }
+        if(empty($password)){
+            $errors[]= "Password cannot be empty";
+        }
+
+        if(!empty($errors)){
+            foreach($errors as $error){
+                echo validation_error($error);
+            }
+        }
+        else{
+            if(login_user($email,$password)){
+                set_message("<p>Login Succssfully! Welecom</p>");
+                redirect("admin.php");
+            }else{
+                set_message("<p class='bg-danger'>Sorry! email or password are wrong  </p>");
+            }
+        }
+    }
+}
+
+/* ********************  login Function ********************************** */
+
+function login_user($email,$password){
+
+    $pass = md5($password);
+    $sql = "select password,id from users where email='".escape($email)."' and password = '".escape($pass)."' ";
+    $result = query($sql);
+    confirm($result);
+    if(row_count($result) == 1){
+        $_SESSION['email'] = $email; 
+        return true;
+    }
+    
+}
+function logedin(){
+    if(isset($_SESSION['email'])){
+        return true;
     }
 }

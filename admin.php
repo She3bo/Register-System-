@@ -3,7 +3,15 @@
 
 
 	<div class="jumbotron">
-		<h1 class="text-center">Admin</h1>
+		<h1 class="text-center">		
+			<?php 
+				if(logedin()){
+					echo "Logged In";
+				}else{
+					redirect("index.php");
+				}
+			?>
+		</h1>
 	</div>
 
 
