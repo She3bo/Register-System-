@@ -201,6 +201,7 @@ function validate_user_login(){
 
         $email       = clean($_POST['email']);
         $password    = clean($_POST['password']);
+        $remember    = isset($_POST['remember']);
 
         if(empty($email)){
             $errors[]= "Email cannot be empty";
@@ -215,7 +216,7 @@ function validate_user_login(){
             }
         }
         else{
-            if(login_user($email,$password)){
+            if(login_user($email,$password,$remember)){
                 set_message("<p>Login Succssfully! Welecom</p>");
                 redirect("admin.php");
             }else{
@@ -227,20 +228,24 @@ function validate_user_login(){
 
 /* ********************  login Function ********************************** */
 
-function login_user($email,$password){
+function login_user($email,$password,$remember){
 
     $pass = md5($password);
     $sql = "select password,id from users where email='".escape($email)."' and password = '".escape($pass)."' ";
     $result = query($sql);
     confirm($result);
     if(row_count($result) == 1){
+        if($remember == "on"){
+            setcookie('email',$email,time()+86400);
+        }
         $_SESSION['email'] = $email; 
         return true;
     }
     
 }
+
 function logedin(){
-    if(isset($_SESSION['email'])){
+    if(isset($_SESSION['email']) || isset($_COOKIE['email'])){
         return true;
     }
 }

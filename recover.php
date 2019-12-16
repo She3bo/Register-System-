@@ -27,7 +27,7 @@
 												
 											</div>
 										</div>
-										<input type="hidden" class="hide" name="token" id="token" value="">
+										<input type="hidden" class="hide" name="token" id="token" value="<?php token_generator();?>">
 									</form>
 								</div>
 							</div>
