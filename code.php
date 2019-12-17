@@ -10,11 +10,11 @@
 			</div>					
 		</div>
 	</div>
-
+    
     <div class="row">
 				<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3">
 					<div class="alert-placeholder">
-	
+					<?php  code_validation(); ?>
 					</div>
 					<div class="panel panel-success">
 						<div class="panel-body">

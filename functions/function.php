@@ -61,7 +61,7 @@ function email_exit($email){
 function send_mail($to,$subject,$message,$header){
    return mail($to,$subject,$message,$header);
 }
-/* ********************  Validation Function ********************************** */
+/* ********************  validate_user_registration Function ********************************** */
 function validate_user_registration(){
 
     $min = 3;
@@ -123,6 +123,7 @@ function validate_user_registration(){
         }
     }
 }
+
 /* ********************  register user Function ********************************** */
 
 function register_user($firstname,$lastname,$username,$email,$password){
@@ -144,7 +145,6 @@ function register_user($firstname,$lastname,$username,$email,$password){
             values('$firstname','$lastname','$username','$email','$password','$confirm_code','0')";
     
     $result = query($sql);
-    confirm($result);
 
     // email parametters to send activation code to user  
     $subject = "Active Account";
@@ -155,7 +155,7 @@ function register_user($firstname,$lastname,$username,$email,$password){
     $header  = "From: norply@yourwebsit.com";
 
 
-    send_mail($email,$subject,$mesg,$header);
+    send_mail($email,$subject,$message,$header);
 
     return true;
 }
@@ -172,12 +172,10 @@ function activate_user(){
 
             $sql = "select id from users where email = '".escape($email)."' and confirm_code = '".escape($code)."' ";
             $result = query($sql);
-            confirm($result);
             
             if(row_count($result) == 1){
                 $sql2 = "update users set active = 1 , confirm_code = 0 where email = '".escape($email)."' and confirm_code = '".escape($code)."' "; 
                 $result2 = query($sql2);
-                confirm($result2);
                 set_message("<p class='bg-success'>Your account has been activated please login </p>");
                 redirect("login.php");
             }else{
@@ -233,7 +231,7 @@ function login_user($email,$password,$remember){
     $pass = md5($password);
     $sql = "select password,id from users where email='".escape($email)."' and password = '".escape($pass)."' ";
     $result = query($sql);
-    confirm($result);
+    
     if(row_count($result) == 1){
         if($remember == "on"){
             setcookie('email',$email,time()+86400);
@@ -249,3 +247,85 @@ function logedin(){
         return true;
     }
 }
+
+/* ******************** recover password Function ********************************** */
+
+function recover_password(){
+    
+    if($_SERVER["REQUEST_METHOD"] == "POST"){
+        if(isset($_SESSION['token']) && $_SESSION['token'] === $_POST['token']){
+            
+            $email = clean($_POST['email']);
+
+            if(email_exit($email)){
+            
+                $confirm_code = md5((int)$email + microtime());
+
+                setcookie('temp_access_code',$confirm_code,time()+900);
+                
+                // add confirm code to database to check it in code page
+
+                $sql = "update users set confirm_code = '".escape($confirm_code)."' where email = '".escape($email)."' ";
+                query($sql);
+
+                // email parametters to send activation code to user  
+                $subject = "please rest your password";
+            
+                $message = "Hear is your password reset code {$confirm_code} 
+                            click hear to rest your password http://localhost/Register-System-/code.php?email=$email&code=$confirm_code";
+            
+                $header  = "From: norply@yourwebsit.com";
+            
+            
+                if(!send_mail($email,$subject,$message,$header)){
+                    echo validation_error("there's a problem email don't sent!");
+                }
+                set_message("<p class='bg-success text-center'>Please check your email for password rest code</p>");
+                redirect("index.php");
+            }else{
+                echo validation_error("your email not found");
+            }
+        }else{
+            
+            redirect("index.php");
+        }
+    }
+}
+
+/* ******************** Code Validation Function ********************************** */
+
+function code_validation(){
+
+    if(isset($_COOKIE['temp_access_code'])){
+        
+        if(!isset($_GET["email"]) && !isset($_GET['code'])){
+            redirect("index.php");
+        }else if(empty($_GET["email"]) || empty($_GET['code'])){
+            redirect("index.php");
+        }else{
+            if(isset($_POST['code'])){
+                $email = clean($_GET['email']);
+                $code = clean($_POST['code']);
+                
+                $sql = "select id from users where email = '".escape($email)."' and confirm_code = '".escape($code)."' ";
+                $result = query($sql);
+
+                if(row_count($result) == 1){
+                    redirect("reset.php");
+                }else{
+                    echo validation_error("Sorry wrong validation code");
+                }
+            }
+        } 
+    }else{
+        set_message("<p class='bg-danger'>Sorry validiation cookie has expierd<p>");
+        redirect("recover.php");
+    }
+}
+
+/* ******************** recover password Function ********************************** */
+
+
+
+/* ******************** Code Validation Function ********************************** */
+
