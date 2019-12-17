@@ -2,7 +2,6 @@
 
 /* ********************  Helper Function ********************************** */
 
-
 function clean($str){
     return htmlentities($str);
 }
@@ -17,7 +16,7 @@ function set_message($message){
         $message ="";
     }
 }
-function dispaly_message(){
+function display_message(){
     if(isset($_SESSION['message'])){
         echo $_SESSION['message'];
         unset($_SESSION['message']);
@@ -254,6 +253,7 @@ function logedin(){
 function recover_password(){
     
     if($_SERVER["REQUEST_METHOD"] == "POST"){
+        // check if he come from my recover page or out page 
         if(isset($_SESSION['token']) && $_SESSION['token'] === $_POST['token']){
             
             $email = clean($_POST['email']);
@@ -312,21 +312,49 @@ function code_validation(){
                 $result = query($sql);
 
                 if(row_count($result) == 1){
-                    redirect("reset.php");
+                    setcookie('temp_access_code',$confirm_code,time()+900);
+                    redirect("reset.php?email={$email}&code={$code}");
                 }else{
                     echo validation_error("Sorry wrong validation code");
                 }
             }
         } 
     }else{
-        set_message("<p class='bg-danger'>Sorry validiation cookie has expierd<p>");
+        set_message("<p class='bg-danger'>Sorry time has expierd<p>");
         redirect("recover.php");
     }
 }
 
-/* ******************** recover password Function ********************************** */
+/* ******************** password reset Function ********************************** */
+
+function password_reset(){
+ 
+   // if(isset($_COOKIE['temp_access_code'])){
+
+        if(isset($_GET["email"]) && isset($_GET['code'])){
+            
+            // check if he come from my recover page or out page 
+            if(isset($_SESSION['token']) &&  isset($_POST['token'])){
+
+                if( $_SESSION['token'] === $_POST['token']){
+                    $password = clean($_POST['password']);
+                    $confirm_password = clean($_POST['confirm_password']);
+                    if($password === $confirm_password){
+                        $password =md5($password);
+                        $sql = "update users set password ='$password', confirm_code = '0' where email = '".escape($_GET['email'])."' ";
+                        query($sql);
+                        set_message("<p class = 'bg-success'>password updateted successfully! please login</p>");
+                        redirect("login.php");
+                    }
+                }
+            }
+        }
+    // }else{
+    //     set_message("<p class='bg-danger'>Sorry time has expierd. try again!<p>");
+    //     redirect("recover.php");
+    // }
+
+}
 
 
-
-/* ******************** Code Validation Function ********************************** */
 

@@ -2,7 +2,7 @@
 <?php include("includes/nav.php")?>
 	 
 	<div class="jumbotron">
-	    <?php dispaly_message();?>
+	    <?php display_message();?>
 		<h1 class="text-center"> Home Page</h1>
 	</div>
 
