@@ -23,6 +23,7 @@ function dispaly_message(){
         unset($_SESSION['message']);
     }
 }
+// الفانكشن دي انا بستخدم التوكن الناتج علشان احطه في الفاليو بتاعة صفحات الكود والريست علشان اتاكد انه جاي من صفحة الكود بتاعي مش من صفحة خارجية 
 function token_generator(){
     $token = $_SESSION['token'] = md5(uniqid(mt_rand(),true));
     return $token;
