@@ -15,7 +15,7 @@ function set_message($message){
     }else{
         $message ="";
     }
-}
+} 
 function display_message(){
     if(isset($_SESSION['message'])){
         echo $_SESSION['message'];
@@ -253,6 +253,9 @@ function logedin(){
 function recover_password(){
     
     if($_SERVER["REQUEST_METHOD"] == "POST"){
+        if(isset($_POST['cancel-submit'])){
+            redirect('login.php');
+        }
         // check if he come from my recover page or out page 
         if(isset($_SESSION['token']) && $_SESSION['token'] === $_POST['token']){
             
@@ -287,10 +290,10 @@ function recover_password(){
                 echo validation_error("your email not found");
             }
         }else{
-            
             redirect("index.php");
         }
     }
+    
 }
 
 /* ******************** Code Validation Function ********************************** */
@@ -312,8 +315,8 @@ function code_validation(){
                 $result = query($sql);
 
                 if(row_count($result) == 1){
-                    setcookie('temp_access_code',$confirm_code,time()+900);
                     redirect("reset.php?email={$email}&code={$code}");
+                    setcookie('temp_access_code',$code,time()+900);
                 }else{
                     echo validation_error("Sorry wrong validation code");
                 }
@@ -329,7 +332,7 @@ function code_validation(){
 
 function password_reset(){
  
-   // if(isset($_COOKIE['temp_access_code'])){
+   if(isset($_COOKIE['temp_access_code'])){
 
         if(isset($_GET["email"]) && isset($_GET['code'])){
             
@@ -349,12 +352,14 @@ function password_reset(){
                 }
             }
         }
-    // }else{
-    //     set_message("<p class='bg-danger'>Sorry time has expierd. try again!<p>");
-    //     redirect("recover.php");
-    // }
+    }else{
+        set_message("<p class='bg-danger'>Sorry time has expierd. try again!<p>");
+       redirect("recover.php");
+    }
 
 }
+
+
 
 
 
